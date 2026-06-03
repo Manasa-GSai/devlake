@@ -62,9 +62,16 @@ jobs:
         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
         restore-keys: |
           ${{ runner.os }}-go-
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        # Override the build image's older Go; go.mod targets go 1.26.
+        go-version: '1.26.4'
     - name: Unit tests
       run: |
         go version
+        go install github.com/vektra/mockery/v2@v2.53.6
+        export PATH="$(go env GOPATH)/bin:$PATH"
         cp env.example .env
         cd backend
         make unit-test
