@@ -1,0 +1,84 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+name: govulncheck
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main, release-*]
+    paths:
+      - '**.go'
+      - 'go.mod'
+      - 'go.sum'
+      - '.github/workflows/govulncheck.yml'
+
+jobs:
+  govulncheck:
+    runs-on: ubuntu-latest
+    # Use the project build image so libgit2/CGO are available and `./...`
+    # (incl. the gitextractor git2go package) can be analyzed.
+    container: mericodev/lake-builder:latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set git config
+        run: git config --global --add safe.directory "$(pwd)"
+
+      # The lake-builder image ships an older Go than go.mod's directive, so
+      # install a matching toolchain (libgit2/CGO still come from the image).
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          # Pin to a patched 1.26.x (>= go.mod's 'go 1.26'); 1.26.4 carries the
+          # latest crypto/x509 + net/textproto stdlib fixes.
+          go-version: '1.26.4'
+
+      - name: Install govulncheck
+        run: go install golang.org/x/vuln/cmd/govulncheck@latest
+
+      # helpers/unithelper imports generated mocks (gitignored), so generate
+      # them before scanning or `govulncheck ./...` fails to load packages.
+      - name: Generate mocks
+        working-directory: backend
+        shell: bash
+        run: |
+          go install github.com/vektra/mockery/v2@v2.53.6
+          export PATH="$(go env GOPATH)/bin:$PATH"
+          make mock
+
+      - name: Run govulncheck
+        working-directory: backend
+        # bash needed for `pipefail` (the build image's default shell is dash).
+        shell: bash
+        # Single source-mode scan of the whole module. `tee` captures the
+        # report for the artifact; `pipefail` propagates govulncheck's exit
+        # code (3 = vulnerabilities found in called code) so the build fails.
+        run: |
+          set -o pipefail
+          govulncheck ./... | tee "$GITHUB_WORKSPACE/govulncheck-results.txt"
+
+      - name: Upload govulncheck results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: govulncheck-results
+          path: govulncheck-results.txt
+          if-no-files-found: warn
