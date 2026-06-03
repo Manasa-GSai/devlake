@@ -1,0 +1,8 @@
+{
+  "description": "Architectural layer-violation baseline enforced by scripts/arch-lint.sh using .go-arch-lint.yml. RATCHET: this number may only decrease. CI fails if the current violation count exceeds it; when violations are fixed, lower this number to lock in the gain.",
+  "violations": 406,
+  "tool": "go-arch-lint",
+  "tool_version": "v1.15.0",
+  "measured_with_go": "1.26.4",
+  "note": "Count reflects upward cross-layer imports under the Edge->Application->Execution->Data model in .go-arch-lint.yml. The assessment's ~610 figure used a different methodology; this is the reproducible baseline for this config."
+}
