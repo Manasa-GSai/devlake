@@ -18,7 +18,21 @@
 set -e
 
 ROOT_DIR=$(dirname $(dirname "$0"))
+
+# Merged coverage profile for all tested packages. Override the path with
+# COVER_PROFILE if needed (e.g. in CI). Each per-package profile is appended
+# (minus its leading "mode:" line) so a single file covers the whole run.
+COVER_PROFILE="${COVER_PROFILE:-coverage.out}"
+echo "mode: atomic" > "$COVER_PROFILE"
+
 for m in $(go list $ROOT_DIR/... | egrep -v 'test|models|e2e'); do
   echo start unit testing on $m
-  go test -timeout 60s -v $m
+  go test -timeout 60s -covermode=atomic -coverprofile=profile.tmp -v $m
+  if [ -f profile.tmp ]; then
+    tail -n +2 profile.tmp >> "$COVER_PROFILE"
+    rm -f profile.tmp
+  fi
 done
+
+echo "==== total coverage ===="
+go tool cover -func="$COVER_PROFILE" | tail -n 1
