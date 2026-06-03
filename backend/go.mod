@@ -44,7 +44,7 @@ require (
 	github.com/chainguard-dev/git-urls v1.0.2
 	github.com/coreos/go-oidc/v3 v3.9.0
 	github.com/go-sql-driver/mysql v1.7.1
-	github.com/golang-jwt/jwt/v5 v5.0.0-rc.1
+	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/merico-ai/graphql v0.0.0-20260206020408-b7fd267bcfac
 	github.com/rogpeppe/go-internal v1.11.0
 	golang.org/x/mod v0.17.0
