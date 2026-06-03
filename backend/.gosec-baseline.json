@@ -1,0 +1,8 @@
+{
+  "description": "gosec HIGH-severity baseline enforced by scripts/gosec-lint.sh. RATCHET: high_findings may only decrease; CI fails if a PR increases it. Excludes G115 (integer-overflow conversion) — a well-known noisy false-positive rule — and generated mocks/test files.",
+  "high_findings": 2,
+  "tool": "gosec",
+  "tool_version": "v2.27.1",
+  "excluded_rules": ["G115"],
+  "note": "The 2 baselined HIGH findings are pre-existing and out of scope to fix in this WO: G402 (a configurable TLS InsecureSkipVerify option in helpers/pluginhelper/api/api_client.go) and G703 (path handling in the dev-only plugins/github/token/cmd/test_refresh CLI). New high-severity findings will fail the gate; once these are addressed, lower this number to ratchet down."
+}

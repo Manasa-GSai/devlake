@@ -169,3 +169,5 @@ venv
 /backend/plugins/gitextractor/parser/demo_repo/
 
 __debug_bin*
+# gosec ratchet report (generated)
+backend/gosec.json
