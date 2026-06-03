@@ -65,6 +65,11 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          # Override the build image's older Go; go.mod targets go 1.26.
+          go-version: '1.26.4'
       - name: Test-mysql
         env:
           DB_URL: mysql://root:root@db:3306/lake?charset=utf8mb4&parseTime=True
@@ -105,6 +110,11 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          # Override the build image's older Go; go.mod targets go 1.26.
+          go-version: '1.26.4'
       - name: Test-pg
         env:
           DB_URL: postgres://merico:merico@db:5432/lake
