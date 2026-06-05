@@ -1,0 +1,6 @@
+{
+  "description": "pip-audit baseline for pydevlake's Python dependencies, enforced by scripts/pip-audit-lint.sh. RATCHET: findings may only decrease; CI fails if a PR increases the count. The venv bootstrap (pip/setuptools/wheel) is excluded so only pydevlake's own dependency tree is audited.",
+  "findings": 2,
+  "tool": "pip-audit",
+  "note": "The 2 baselined findings are pre-existing and out of scope to fix in this WO (which adds the gate): certifi PYSEC-2024-230 (fix: bump to >=2024.7.4 — a safe future ratchet) and pytest CVE-2025-71176 (a dev-only test dependency; fix requires pytest 9.x, a breaking major bump). New vulnerabilities will fail the gate; lower this number as findings are resolved."
+}
